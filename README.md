@@ -1,6 +1,8 @@
 <!-- --8<-- [start:docs-index-intro] -->
 
-# Yamtrack
+# Hamtrack
+
+> **Note:** This is a personalized fork of the original [Yamtrack](https://github.com/FuzzyGrim/Yamtrack) project. It includes custom features such as a fully integrated **Trending Media** page powered by TMDB.
 
 ![App Tests](https://github.com/FuzzyGrim/Yamtrack/actions/workflows/app-tests.yml/badge.svg)
 ![Docker Image](https://github.com/FuzzyGrim/Yamtrack/actions/workflows/docker-image.yml/badge.svg)
@@ -8,7 +10,7 @@
 ![Codecov](https://codecov.io/github/FuzzyGrim/Yamtrack/branch/dev/graph/badge.svg?token=PWUG660120)
 ![GitHub](https://img.shields.io/badge/license-AGPL--3.0-blue)
 
-Yamtrack is a self hosted media tracker for movies, tv shows, anime, manga, video games, books, comics, and board games.
+Hamtrack (based on Yamtrack) is a self hosted media tracker for movies, tv shows, anime, manga, video games, books, comics, and board games.
 
 <!-- --8<-- [end:docs-index-intro] -->
 
@@ -104,3 +106,4 @@ Pull requests are welcome! Whether it's fixing typos, improving documentation, o
 If you'd like to support the project financially:
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/fuzzygrim)
+# yamtrack-fork
