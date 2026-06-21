@@ -85,6 +85,7 @@ urlpatterns = [
         views.search_parent_season,
         name="search_parent_season",
     ),
+    path("trending", views.trending, name="trending"),
     path("statistics", views.statistics, name="statistics"),
     path("serviceworker.js", views.service_worker, name="service_worker"),
 ]

@@ -271,3 +271,8 @@ def search(media_type, query, page, source=None):
         MediaTypes.BOARDGAME.value: lambda: bgg.search(query, page),
     }
     return search_handlers[media_type]()
+
+
+def get_trending(time_window="day"):
+    """Return trending media."""
+    return tmdb.trending(time_window=time_window)

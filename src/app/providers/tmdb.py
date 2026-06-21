@@ -807,6 +807,45 @@ def watch_provider_regions():
     return data
 
 
+def trending(time_window="day"):
+    """Return trending media from TMDB."""
+    cache_key = f"trending_{Sources.TMDB.value}_{time_window}"
+    data = cache.get(cache_key)
+
+    if data is None:
+        url = f"{base_url}/trending/all/{time_window}"
+        params = {**base_params}
+
+        try:
+            response = services.api_request(
+                Sources.TMDB.value,
+                "GET",
+                url,
+                params=params,
+            )
+        except requests.exceptions.HTTPError as error:
+            handle_error(error)
+
+        results = []
+        for media in response["results"]:
+            m_type = media.get("media_type")
+            if m_type not in ["movie", "tv"]:
+                continue
+                
+            results.append({
+                "media_id": media["id"],
+                "source": Sources.TMDB.value,
+                "media_type": m_type,
+                "title": get_title(media),
+                "image": get_image_url(media.get("poster_path")),
+            })
+            
+        data = {"results": results}
+        cache.set(cache_key, data, timeout=7200)
+
+    return data
+
+
 def get_changed_ids(media_type):
     """Return changed TMDB ids for the given media type over the last days."""
     url = f"{base_url}/{media_type}/changes"

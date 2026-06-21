@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load app_tags %}
+
+{% block title %}
+  Trending - Yamtrack
+{% endblock title %}
+
+{% block content %}
+  <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-y-4">
+    <h2 class="text-2xl font-bold">Trending</h2>
+    <div class="flex items-center flex-wrap gap-x-4 gap-y-2">
+      <span class="text-sm text-gray-400">Time Window:</span>
+      <div class="flex gap-x-2">
+        <a href="{% url 'trending' %}?time_window=day"
+           class="px-3 py-1.5 text-sm rounded-md transition-colors duration-200 cursor-pointer flex items-center {% if time_window == 'day' %}bg-indigo-600 text-white{% else %}bg-gray-700 text-gray-300 hover:bg-gray-600{% endif %}">
+          Today
+        </a>
+        <a href="{% url 'trending' %}?time_window=week"
+           class="px-3 py-1.5 text-sm rounded-md transition-colors duration-200 cursor-pointer flex items-center {% if time_window == 'week' %}bg-indigo-600 text-white{% else %}bg-gray-700 text-gray-300 hover:bg-gray-600{% endif %}">
+          This Week
+        </a>
+      </div>
+    </div>
+  </div>
+
+  {% if data.results %}
+    <div class="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-4">
+      {% for result in data.results %}
+        {% include "app/components/media_card.html" with item=result.item title=result.item.title media=result.media %}
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="flex flex-col items-center justify-center py-32 px-4 bg-[#2a2f35] rounded-lg">
+      <div class="bg-[#39404b] rounded-full p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+        {% include "app/icons/flame.svg" with classes="w-8 h-8 text-gray-400" %}
+      </div>
+      <h3 class="text-xl font-semibold mb-2">No trending data found</h3>
+      <p class="text-gray-400 text-center max-w-md mb-8">
+        We couldn't load the trending data at this time. Please try again later.
+      </p>
+    </div>
+  {% endif %}
+{% endblock content %}

@@ -802,7 +802,7 @@ def search_parent_tv(request):
     return render(
         request,
         "app/components/search_parent_tv.html",
-        {"results": parent_tvs, "query": query},
+        {"parent_tvs": parent_tvs, "query": query},
     )
 
 
@@ -810,13 +810,15 @@ def search_parent_tv(request):
 def search_parent_season(request):
     """Return the search results for parent seasons."""
     query = request.GET.get("q", "").strip()
+    parent_tv_id = request.GET.get("parent_tv")
 
-    if len(query) <= 1:
-        return render(request, "app/components/search_parent_tv.html")
+    if len(query) <= 1 or not parent_tv_id:
+        return render(request, "app/components/search_parent_season.html")
 
     logger.debug(
-        "%s - Searching for seasons with query: %s",
+        "%s - Searching for Seasons under TV ID %s with query: %s",
         request.user.username,
+        parent_tv_id,
         query,
     )
 
@@ -825,13 +827,48 @@ def search_parent_season(request):
         item__source=Sources.MANUAL.value,
         item__media_type=MediaTypes.SEASON.value,
         item__title__icontains=query,
+        related_tv_id=parent_tv_id,
     )[:5]
 
     return render(
         request,
         "app/components/search_parent_season.html",
-        {"results": parent_seasons, "query": query},
+        {"parent_seasons": parent_seasons, "query": query},
     )
+
+
+@login_not_required
+@require_GET
+def service_worker(request):
+    """Serve the serviceworker.js file."""
+    sw_path = Path(settings.BASE_DIR) / "static" / "js" / "serviceworker.js"
+    with sw_path.open() as f:
+        return HttpResponse(f.read(), content_type="application/javascript")
+
+
+@login_not_required
+@require_GET
+def trending(request):
+    """Return the trending page."""
+    time_window = request.GET.get("time_window", "day")
+    if time_window not in ["day", "week"]:
+        time_window = "day"
+    
+    data = services.get_trending(time_window=time_window)
+    
+    # Enrich search results with user tracking data
+    if data.get("results"):
+        data["results"] = helpers.enrich_items_with_user_data(
+            request, data["results"], "search"
+        )
+        
+    context = {
+        "data": data,
+        "time_window": time_window,
+        "layout": "grid",
+    }
+    
+    return render(request, "app/trending.html", context)
 
 
 @require_GET
