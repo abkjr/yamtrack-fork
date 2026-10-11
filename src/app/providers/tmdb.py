@@ -204,7 +204,7 @@ def movie(media_id):
                 "id": member.get("id"),
                 "name": member.get("name"),
                 "character": member.get("character"),
-                "image": get_image_url(member.get("profile_path")),
+                "image": get_image_url(member.get("profile_path"), size="w185"),
             }
             for member in cast[:30]
         ]
@@ -506,12 +506,12 @@ def get_format(media_type):
     return "Movie"
 
 
-def get_image_url(path):
+def get_image_url(path, size="w342"):
     """Return the image URL for the media."""
     # when no image, value from response is null
     # e.g movie: 445290
     if path:
-        return f"https://image.tmdb.org/t/p/w500{path}"
+        return f"https://image.tmdb.org/t/p/{size}{path}"
     return settings.IMG_NONE
 
 
@@ -683,7 +683,7 @@ def filter_providers(all_providers, region):
     # Convert dict back to list and add image URLs
     providers = list(providers.values())
     for provider in providers:
-        provider["image"] = get_image_url(provider.get("logo_path"))
+        provider["image"] = get_image_url(provider.get("logo_path"), size="w92")
 
     providers.sort(key=lambda e: e.get("display_priority", 999))
     return providers
@@ -712,7 +712,7 @@ def process_episodes(season_metadata, episodes_in_db):
                 "season_number": season_metadata["season_number"],
                 "episode_number": episode_number,
                 "air_date": episode["air_date"],  # when unknown, response returns null
-                "image": get_image_url(episode["still_path"]),
+                "image": get_image_url(episode["still_path"], size="w300"),
                 "title": episode["name"],
                 "overview": episode["overview"],
                 "history": tracked_episodes.get(episode_number, []),
@@ -753,7 +753,7 @@ def episode(media_id, season_number, episode_number):
                 "title": season_metadata["title"],
                 "season_title": season_metadata["season_title"],
                 "episode_title": episode["name"],
-                "image": get_image_url(episode["still_path"]),
+                "image": get_image_url(episode["still_path"], size="w300"),
             }
 
     # Episode not found - throw ProviderAPIError

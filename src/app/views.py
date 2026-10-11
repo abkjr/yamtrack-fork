@@ -802,7 +802,7 @@ def search_parent_tv(request):
     return render(
         request,
         "app/components/search_parent_tv.html",
-        {"parent_tvs": parent_tvs, "query": query},
+        {"results": parent_tvs, "parent_tvs": parent_tvs, "query": query},
     )
 
 
@@ -833,7 +833,7 @@ def search_parent_season(request):
     return render(
         request,
         "app/components/search_parent_season.html",
-        {"parent_seasons": parent_seasons, "query": query},
+        {"results": parent_seasons, "parent_seasons": parent_seasons, "query": query},
     )
 
 
@@ -846,28 +846,72 @@ def service_worker(request):
         return HttpResponse(f.read(), content_type="application/javascript")
 
 
-@login_not_required
 @require_GET
 def trending(request):
     """Return the trending page."""
     time_window = request.GET.get("time_window", "day")
     if time_window not in ["day", "week"]:
         time_window = "day"
-    
+
     data = services.get_trending(time_window=time_window)
-    
+
     # Enrich search results with user tracking data
     if data.get("results"):
-        data["results"] = helpers.enrich_items_with_user_data(
-            request, data["results"], "search"
-        )
-        
+        if request.user.is_authenticated:
+            # Group items by media_type because enrich_items_with_user_data expects homogeneous media_type
+            movie_items = [
+                i
+                for i in data["results"]
+                if i.get("media_type") == MediaTypes.MOVIE.value
+            ]
+            tv_items = [
+                i
+                for i in data["results"]
+                if i.get("media_type") == MediaTypes.TV.value
+            ]
+
+            enriched_movies = {
+                (str(e["item"]["media_id"]), e["item"]["source"]): e["media"]
+                for e in (
+                    helpers.enrich_items_with_user_data(
+                        request, movie_items, "search"
+                    )
+                    if movie_items
+                    else []
+                )
+            }
+            enriched_tv = {
+                (str(e["item"]["media_id"]), e["item"]["source"]): e["media"]
+                for e in (
+                    helpers.enrich_items_with_user_data(
+                        request, tv_items, "search"
+                    )
+                    if tv_items
+                    else []
+                )
+            }
+
+            enriched_results = []
+            for item in data["results"]:
+                key = (str(item["media_id"]), item["source"])
+                media = (
+                    enriched_movies.get(key)
+                    if item.get("media_type") == MediaTypes.MOVIE.value
+                    else enriched_tv.get(key)
+                )
+                enriched_results.append({"item": item, "media": media})
+            data["results"] = enriched_results
+        else:
+            data["results"] = [
+                {"item": item, "media": None} for item in data["results"]
+            ]
+
     context = {
         "data": data,
         "time_window": time_window,
         "layout": "grid",
     }
-    
+
     return render(request, "app/trending.html", context)
 
 

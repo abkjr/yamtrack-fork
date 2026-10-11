@@ -7,6 +7,8 @@
       <a href="{{ media.item|media_url }}">
         <img alt="{{ media }}"
              class="lazyload w-full aspect-2/3 {% if media.item.image != IMG_NONE %}object-cover{% endif %}"
+             loading="lazy"
+             decoding="async"
              data-src="{{ media.item.image }}"
              src="{{ IMG_NONE }}">
       </a>
